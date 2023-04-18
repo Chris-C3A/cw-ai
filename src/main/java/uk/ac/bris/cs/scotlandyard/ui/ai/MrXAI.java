@@ -1,15 +1,23 @@
 package uk.ac.bris.cs.scotlandyard.ui.ai;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.graph.ImmutableValueGraph;
+
 import io.atlassian.fugue.Pair;
 import uk.ac.bris.cs.scotlandyard.model.Board;
 import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.model.Piece;
 import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
+import uk.ac.bris.cs.scotlandyard.model.Piece.MrX;
+import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Transport;
 
 import javax.annotation.Nonnull;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import uk.ac.bris.cs.scotlandyard.model.*;
@@ -24,66 +32,213 @@ public class MrXAI implements Ai {
             Pair<Long, TimeUnit> timeoutPair) {
 
         // returns a random move, replace with your own implementation
+        GameState state = (GameState) board;
 
         // AI implementations
         // Scoring Function
         // MiniMax algorithm
         // montecarlo
-        this.score(board);
+
+        int maxScore = Integer.MIN_VALUE;
+        Move bestMove = null;
 
         var moves = board.getAvailableMoves().asList();
-        // for (Move move : moves) {
-        //     Board nextState = board.
-        //     this.score()
-        // }
-        return moves.get(new Random().nextInt(moves.size()));
+
+        for (Move move : moves) {
+            GameState nextState = state.advance(move);
+
+            // get score of state
+            int score = this.score(getMrXLocationFromMove(move), nextState);
+
+            if (score > maxScore) {
+                maxScore = score;
+                bestMove = move;
+            }
+
+            System.out.println("Score:" + score);
+        }
+
+        System.out.println("maxScore:" + maxScore);
+        // return moves.get(new Random().nextInt(moves.size()));
+        System.out.println("Best Move: " + bestMove.toString());
+        return bestMove;
     }
 
-    private void score(Board board) {
+    private int score(int mrXlocation, Board board) {
+        int C = 8;
         // detective locations
         // mrX location
         // distance mrx and detectives (dijkstra's algorithm)
         // number of moves available to mrX (more moves = better) (higher score) (nbr of desitnations from current location)
         // node station (taxi, bus, underground)
+        // Integer mrXlocation = this.getMrXLocation(board).get();
         
-        int score;
-
-        var moves = board.getAvailableMoves().asList(); // mrX moves
-
-       ImmutableSet<Piece> players = board.getPlayers();
-
-       board.getSetup().graph.edges().forEach(edge -> {
-           System.out.println(board.getSetup().graph.edgeValue(edge));
-        });
-
-       board.getSetup().graph.nodes().forEach(node -> System.out.println(node));
-        // ImmutableSet<Player> players = board.getPlayers();
-        // board.
+        int score = 0;
 
 
-        // // loop through detective pieces
-        // for(Piece.Detective p : Piece.Detective.values()){ //Creates list of detectives
-        //     // Integer location = board.getDetectiveLocation(p).orElseThrow();
-        //     Optional<Integer> location = board.getDetectiveLocation(p);
-        //     if (location.isPresent()) {
-        //         System.out.println(location.get());
-        //     }
-        //     // if(location.isPresent()) detectives.add(createPlayer(p, location.get(), board));
-        // }
+        // get detective locations
+        List<Integer> detectiveLocations = this.getDetectiveLocations(board);
 
-        // // get player locations
-        // for (Piece player : players) {
-        //     if (player.isDetective()) {
-        //         // weird way of casting to get detective location
-        //         int detective_location = board.getDetectiveLocation((Piece.Detective) player).orElseThrow();
-        //         // get distance of mrX to detective location (source: mrX, destination: detective_location)
-        //         // pathToDetective()
-        //         System.out.println(detective_location);
-        //     }
-        // }
+        // nodes from mrX location
+        Set<Integer> adjacentNodes = board.getSetup().graph.adjacentNodes(mrXlocation)
+        .stream()
+        .filter(node -> !occupiedLocation(detectiveLocations, node)).collect(ImmutableSet.toImmutableSet());
+
+        // number of ajacent nodes
+        int nbrOfNodes = adjacentNodes.size(); // part of score
+
+        score += nbrOfNodes * C;// 8
+
+        // dijkstra's algorithm
+        for (Integer detectiveLocation : detectiveLocations) {
+            // shortest path from mrX to detective
+            int shortestPath = this.ShortestPathFromSourceToDestination(board.getSetup().graph, mrXlocation, detectiveLocation);
+
+            System.out.println("MrX: " + mrXlocation);
+            System.out.println("Detective:" + detectiveLocation);
+            System.out.println("Shortest Path:" + shortestPath);
+
+            score += shortestPath;
+        }
+
+ 
+       return score;
+
         // a good move for mrx is to get away from the detectives and be in a position with many options to move
         // return score of the current board
         // using this method we select the best move for mrX to take
     }
+
+
+    private List<Integer> getDetectiveLocations(Board board) {
+        List<Integer> detectiveLocations = new ArrayList<Integer>();
+        // get player locations
+        for (Piece player : board.getPlayers()) {
+            if (player.isDetective()) {
+                Optional<Integer> location = board.getDetectiveLocation((Piece.Detective) player);
+
+                if (location.isPresent()) {
+                    detectiveLocations.add(location.get());
+                }
+            }
+        }
+
+        return detectiveLocations;
+    }
+
+    private static boolean occupiedLocation(List<Integer> detectiveLocations, int destination) {
+        for (Integer location : detectiveLocations) {
+            if (location == destination) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // get mrX location
+
+    private Integer getMrXLocationFromMove(Move move) {
+        return move.accept(new Move.Visitor<Integer>() {
+            @Override
+            public Integer visit(Move.SingleMove move) {
+                return move.destination;
+            }
+
+            @Override
+            public Integer visit(Move.DoubleMove move) {
+                return move.destination2;
+            }
+        });
+    }
+
+private Integer ShortestPathFromSourceToDestination(ImmutableValueGraph<Integer, ImmutableSet<Transport>> graph, int source, int destination) {
+    int Infinity = Integer.MAX_VALUE;
+    int size = graph.nodes().size();
+
+
+    Integer dist[] = new Integer[size+1];
+    Integer prev[] = new Integer[size+1];
+    Boolean unvisited[] = new Boolean[size+1];
+
+
+    List<Integer> shortestPath = new ArrayList<>();
+
+    for (int i = 0; i <= size; i++) {
+        dist[i] = Infinity;
+        prev[i] = null; // undefined previous
+        unvisited[i] = false;
+    }
+
+    // dist of source
+    dist[source] = 0;
+
+    for (int i = 0; i < size; i++) {
+        Integer u = findMinDistance(dist, unvisited);
+
+        // only interested in destination
+        if (u == destination) {
+            // if (prev[u] == null || u == source) {
+            while (prev[u] != null || u != source) {
+                shortestPath.add(u);
+                u = prev[u];
+            }
+
+            shortestPath.add(source); // add source node to the shortest path
+            Collections.reverse(shortestPath); // reverse the list to get the correct order
+            System.out.println(shortestPath);
+            // distance to destination
+            return dist[destination];
+        }
+
+        unvisited[u] = true;
+        for (int v : graph.adjacentNodes(u)) {
+            ImmutableSet<Transport> transports = graph.edgeValue(u, v).get();
+            int edgeWeight = getTransportsWeigth(transports);
+
+            if (!unvisited[v] && !graph.edgeValue(u, v).isEmpty() && (dist[u] + edgeWeight < dist[v])) {
+                dist[v] = dist[u] + edgeWeight;
+                prev[v] = u;
+            }
+        }
+
+    }
+
+    return -1;
+}
+
+	private static int findMinDistance(Integer[] distance, Boolean[] visitedVertex) {
+		int minDistance = Integer.MAX_VALUE;
+		int minDistanceVertex = -1;
+
+		for (int i = 0; i < distance.length; i++) {
+			if (!visitedVertex[i] && distance[i] < minDistance) {
+				minDistance = distance[i];
+				minDistanceVertex = i;
+			}
+		}
+
+		return minDistanceVertex;
+	}
+
+    private static int getTransportsWeigth(ImmutableSet<Transport> transports) {
+        int weight = 0;
+
+        for (Transport transport : transports) {
+            switch (transport) {
+                case TAXI:
+                    weight += 8;
+                    break;
+                case BUS:
+                    weight += 4;
+                    break;
+                case UNDERGROUND:
+                    weight += 1;
+                    break;
+            }
+        }
+
+        return weight;
+    }
+
 
 }
