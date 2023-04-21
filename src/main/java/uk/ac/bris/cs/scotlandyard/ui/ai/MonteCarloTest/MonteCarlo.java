@@ -4,14 +4,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.Immutable;
 
-import javafx.print.PrintColor;
 import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.model.Piece;
 import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
-import uk.ac.bris.cs.scotlandyard.model.Piece.MrX;
 
 // public class MonteCarlo {
 
@@ -195,26 +191,26 @@ public class MonteCarlo {
         return rootNode.bestChild().getMove();
     }
 
-    private MonteCarloNode treePolicy() {
-        MonteCarloNode node = rootNode;
+    // private MonteCarloNode treePolicy() {
+    //     MonteCarloNode node = rootNode;
         
-        // if (node == null) {
-        //     this.printFullTree(rootNode);
-        // }
+    //     // if (node == null) {
+    //     //     this.printFullTree(rootNode);
+    //     // }
 
-        while (!node.isTerminalNode()) {
-            if (!node.isFullyExpanded()) {
-                return expand(node);
-            } else {
-                node = node.selectChild();
-                if (node == null) {
-                    System.out.println("NULL NODE");
-                    this.printFullTree(rootNode);
-                }
-            }
-        }
-        return node;
-    }
+    //     while (!node.isTerminalNode()) {
+    //         if (!node.isFullyExpanded()) {
+    //             return expand(node);
+    //         } else {
+    //             node = node.selectChild();
+    //             if (node == null) {
+    //                 System.out.println("NULL NODE");
+    //                 this.printFullTree(rootNode);
+    //             }
+    //         }
+    //     }
+    //     return node;
+    // }
 
     private MonteCarloNode select(MonteCarloNode node) {
         MonteCarloNode leaf = node;

@@ -1,6 +1,8 @@
 package uk.ac.bris.cs.scotlandyard.ui.ai;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,32 +15,40 @@ import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
 
 public class State {
     private GameState board;
+    private int mrXLocation;
 
 
-    public State(GameState board) {
+    public State(GameState board, int mrXLocation) {
         this.board = board;
+        this.mrXLocation = mrXLocation;
     }
 
-    public State advance(Move move) {
-        return new State(this.board.advance(move));
-    }
+    // public State advance(Move move) {
+    //     return new State(this.board.advance(move));
+    // }
 
     public Set<Piece> getDetectivePieces() {
         return this.board.getPlayers().stream().filter(player -> player.isDetective()).collect(Collectors.toSet());
     }
 
     public State advanceMrX(Move move) {
-        return new State(this.board.advance(move));
+        return new State(this.board.advance(move), move.accept(new Move.Visitor<Integer>() {
+            @Override
+            public Integer visit(Move.SingleMove move) {
+                return move.destination;
+            }
+
+            @Override
+            public Integer visit(Move.DoubleMove move) {
+                return move.destination2;
+            }
+        }));
     }
 
     //! keep advancing until all detectives have moved
     public State advanceDetective(Move move) {
-        return new State(this.board.advance(move));
+        return new State(this.board.advance(move), this.getMrXLocation());
     }
-    // public State makeMove(Move move) {
-    //     this.board = this.board.advance(move);
-    //     return new State(this.board);
-    // }
 
     public GameState getBoard() {
         return this.board;
@@ -47,6 +57,10 @@ public class State {
     public GameSetup getSetup() {
         return this.board.getSetup();
         // this.board.getSetup().moves.size();// total rounds
+    }
+
+    public int getMrXLocation() {
+        return this.mrXLocation;
     }
 
     public boolean isTerminal() {
@@ -68,7 +82,12 @@ public class State {
     }    
 
     public List<State> getPossibleStates() {
-        return this.board.getAvailableMoves().stream().map(move -> new State(this.board.advance(move))).collect(Collectors.toList());
+        if (this.isMrxTurn()) {
+            return this.getAvailableMoves().stream().map(move -> this.advanceMrX(move)).collect(Collectors.toList());
+        } else {
+            return this.getAvailableMoves().stream().map(move -> this.advanceDetective(move)).collect(Collectors.toList());
+        }
+        // return this.board.getAvailableMoves().stream().map(move -> new State(this.board.advance(move))).collect(Collectors.toList());
     }
 
     // current round number
@@ -95,5 +114,20 @@ public class State {
         } else {
             return winner.None;
         }
+    }
+
+    // ! write in functional style
+    public List<Integer> getDetectiveLocations() {
+        List<Integer> detectiveLocations = new ArrayList<Integer>();
+        // get player locations
+        for (Piece detective : this.getDetectivePieces()) {
+            Optional<Integer> location = this.getBoard().getDetectiveLocation((Piece.Detective) detective);
+
+            if (location.isPresent()) {
+                detectiveLocations.add(location.get());
+            }
+        }
+
+        return detectiveLocations;
     }
 }

@@ -1,12 +1,10 @@
 package uk.ac.bris.cs.scotlandyard.ui.ai;
 
-import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 
 
-import com.google.common.collect.ImmutableSet;
 import io.atlassian.fugue.Pair;
 import uk.ac.bris.cs.scotlandyard.model.*;
 import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
@@ -21,7 +19,7 @@ public class MonteCarloMrXAI implements Ai {
   @Override
   public Move pickMove(@Nonnull Board board, Pair<Long, TimeUnit> timeoutPair) {
     // GameState state = (GameState) board;
-    State state = new State((GameState) board);
+    State state = new State((GameState) board, board.getAvailableMoves().asList().get(0).source());
 
     MonteCarlo monteCarlo = new MonteCarlo(state, true);
 

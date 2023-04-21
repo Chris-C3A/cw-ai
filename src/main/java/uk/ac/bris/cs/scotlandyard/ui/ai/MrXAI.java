@@ -1,25 +1,12 @@
 package uk.ac.bris.cs.scotlandyard.ui.ai;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.graph.ImmutableValueGraph;
 
 import io.atlassian.fugue.Pair;
 import uk.ac.bris.cs.scotlandyard.model.Board;
 import uk.ac.bris.cs.scotlandyard.model.Move;
-import uk.ac.bris.cs.scotlandyard.model.Piece;
 import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
-import uk.ac.bris.cs.scotlandyard.model.Piece.MrX;
-import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Ticket;
-import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Transport;
-import uk.ac.bris.cs.scotlandyard.ui.ai.MonteCarloTest.MonteCarlo;
 
 import javax.annotation.Nonnull;
-import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import uk.ac.bris.cs.scotlandyard.model.*;
@@ -36,7 +23,8 @@ public class MrXAI implements Ai {
     @Override 
     public Move pickMove(@Nonnull Board board, Pair<Long, TimeUnit> timeoutPair) {
 
-        GameState state = (GameState) board;
+        // GameState state = (GameState) board;
+
 
         MiniMax miniMax = new MiniMax();
 
@@ -44,42 +32,53 @@ public class MrXAI implements Ai {
         // Scoring Function
         // MiniMax algorithm
         // montecarlo
-        // System.out.println(state.get);
 
         int maxScore = Integer.MIN_VALUE;
-        // Score maxScore = null;
         Move bestMove = null;
 
         // get available moves for mrX in current round
         var moves = board.getAvailableMoves().asList();
 
         int mrXLocation = moves.get(0).source();
+        State state = new State((GameState) board, mrXLocation);
 
-        System.out.println(mrXLocation);
 
 
         // miniMax.minimax(state, mrXLocation, 1, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
 
 
         // ! minimax implementation
+        // int score = miniMax.minimax(state, 3, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        // System.out.println("score: " + score);
         for (Move move: moves) {
-            GameState nextState = state.advance(move);
+            State nextState = state.advanceMrX(move);
 
             // Test
-            LogEntry mrXLocationTest = nextState.getMrXTravelLog().get(nextState.getMrXTravelLog().size()-1);
+            // LogEntry mrXLocationTest = nextState.getBoard().getMrXTravelLog().get(nextState.getMrXTravelLog().size()-1);
             // System.out.println("location from log:" + mrXLocationTest.location().isEmpty());
 
             // depth of 2 minimax
-            int score = miniMax.minimax(nextState, move, 1, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
+            int score = miniMax.minimax(nextState, move, 6, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
             if (score > maxScore) {
                 maxScore = score;
                 bestMove = move;
             }
+            System.out.println("score: " + score + " move: " + move.toString());
         }
+        //! idea: store all scores for each move
+        //! filter moves based on round number (revealing round) filter out double moves unless its score is really high and other single moves are bad
+        //! filter out secret moves unless its after a revealing round or its score is really high and other moves are bad
+
+
+        System.out.println("nbr of runs: " + miniMax.getNumberOfRuns());
+
+        System.out.println("best move:");
+        System.out.println(bestMove.toString() + " score: " + maxScore);
 
 
         return bestMove;
+        // return moves.get(0);
     }
 
 }

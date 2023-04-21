@@ -1,19 +1,9 @@
 package uk.ac.bris.cs.scotlandyard.ui.ai.MonteCarloImplementation;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.Immutable;
 
 import io.atlassian.fugue.Pair;
-import javafx.print.PrintColor;
 import uk.ac.bris.cs.scotlandyard.model.Move;
-import uk.ac.bris.cs.scotlandyard.model.Piece;
-import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
-import uk.ac.bris.cs.scotlandyard.model.Piece.MrX;
 import uk.ac.bris.cs.scotlandyard.ui.ai.State;
 import java.util.concurrent.TimeUnit;
 
@@ -23,13 +13,13 @@ public class MonteCarlo {
     private MonteCarloNode rootNode;
     private State state;
     // private Game game;
-    private Boolean player;
+    // private Boolean player;
     private int nb_simulations = 0;
 
     public MonteCarlo(State state, Boolean player) {
         this.state = state;
         // this.game = view.getGame();
-        this.player = player;
+        // this.player = player;
         // this.rootNode = new MonteCarloNode(null, null, state, state.getPossibleStates(), player);
         this.rootNode = new MonteCarloNode(null, null, state, state.isMrxTurn());
     }

@@ -12,7 +12,6 @@ import uk.ac.bris.cs.scotlandyard.model.Move.SingleMove;
 import uk.ac.bris.cs.scotlandyard.model.Piece;
 import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Ticket;
-import uk.ac.bris.cs.scotlandyard.ui.ai.Score;
 
 public class MonteCarloNode {
 

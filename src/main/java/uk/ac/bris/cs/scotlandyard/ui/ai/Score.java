@@ -9,8 +9,6 @@ import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.ImmutableValueGraph;
 
-import uk.ac.bris.cs.scotlandyard.model.Board;
-import uk.ac.bris.cs.scotlandyard.model.LogEntry;
 import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.model.Piece;
 import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
@@ -18,39 +16,20 @@ import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Ticket;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Transport;
 
 
-// TODO score detective moves
-
-// public class Score {
-    
-
-//     // scores detective moves
-//     public int scoreDetectives() {
-//         return 0;
-//     }
-
-//     // scores mrX moves
-//     public int scoreMrX() {
-//         return 0;
-//     }
-// }
 
 public class Score {
     private int score;
     private int mrXlocation;
+    private State state;
     private Move move;
-    private GameState state;
 
     // Constructor
-    public Score(Move move, GameState state, Boolean maximizingPlayer) {
+    public Score(Move move, State state, Boolean maximizingPlayer) {
         this.move = move;
         this.state = state;
 
         this.score = 0;
-        if (maximizingPlayer) {
-            this.mrXlocation = Game.getMrXLocationFromMove(move);
-        } else {
-            this.mrXlocation = Game.getMrXLocationFromLog(state);
-        }
+        this.mrXlocation = this.state.getMrXLocation();
 
         this.scoreState();
     }
@@ -64,9 +43,9 @@ public class Score {
         return this.mrXlocation;
     }
 
-    public Move getMove() {
-        return this.move;
-    }
+    // public Move getMove() {
+    //     return this.move;
+    // }
 
     public void scoreDetectives(Move move, GameState state) {
         // get mrX location from travel log
@@ -76,34 +55,44 @@ public class Score {
 
     public void scoreState() {
         // Constants
-        int C = 12;
+        // int C = 12;
+        int C = 9;
 
         // get detective locations
-        List<Integer> detectiveLocations = Game.getDetectiveLocations(this.state);
+        // List<Integer> detectiveLocations = Game.getDetectiveLocations(this.state);
+        List<Integer> detectiveLocations = this.state.getDetectiveLocations();
 
         Set<Integer> adjacentNodes = this.state.getSetup().graph.adjacentNodes(mrXlocation);
 
         // number of ajacent nodes
         int nbrOfNodes = adjacentNodes.size(); // part of score
 
+        // add score for nbr of nodes mrX can move to
         this.score += (nbrOfNodes * C); // 12
 
+
+        int minDetectiveDistance = Integer.MAX_VALUE;
         // dijkstra's algorithm
         for (Integer detectiveLocation : detectiveLocations) {
             // shortest path from mrX to detective
             int shortestPath = this.ShortestPathFromSourceToDestination(this.state.getSetup().graph, detectiveLocation, mrXlocation);
 
+            // get minimum distance from mrX to detective
+            minDetectiveDistance = Math.min(minDetectiveDistance, shortestPath);
+
             // System.out.println("MrX: " + mrXlocation);
             // System.out.println("Detective:" + detectiveLocation);
             // System.out.println("Shortest Path:" + shortestPath);
 
-            this.score += shortestPath;
+            // this.score += shortestPath;
 
             // check if mrX is in a position where he can be caught
             if (adjacentNodes.contains(detectiveLocation)) {
                 this.score -= 1000;
             }
         }
+
+        this.score += minDetectiveDistance;
 
         // System.out.println("mrXLocation" + mrXlocation);
         // System.out.println("Score after dijkstra's algorithm: " + this.score);
@@ -114,109 +103,43 @@ public class Score {
 
 
         // winning state score
-        this.state.getWinner().forEach(winner -> {
-            if (winner == Piece.MrX.MRX) {
-                this.score += 200;
-            } else {
-                this.score -= 200;
-            }
-        });
+        if (this.state.getWinner() == State.winner.MrX) {
+            this.score += 200;
+        } else if (this.state.getWinner() == State.winner.Detectives) {
+            this.score -= 200;
+        }
+
+        // System.out.println("Score: " + this.score);
     }
 
 
-    // public void scoreState() {
-    //     // TODO implement game winning / losing scores
 
-    //     // Constants
-    //     int C = 12;
-
-    //     // detective locations
-    //     // mrX location
-    //     // distance mrx and detectives (dijkstra's algorithm)
-    //     // number of moves available to mrX (more moves = better) (higher score) (nbr of desitnations from current location)
-    //     // node station (taxi, bus, underground)
-    //     // Integer mrXlocation = this.getMrXLocation(board).get();
-        
-    //     // int score = 0;
-
-
-    //     // get detective locations
-    //     List<Integer> detectiveLocations = this.getDetectiveLocations(this.state);
-
-    //     // nodes from mrX location
-    //     // Set<Integer> adjacentNodes = this.state.getSetup().graph.adjacentNodes(mrXlocation)
-    //     // .stream()
-    //     // .filter(node -> !this.occupiedLocation(detectiveLocations, node)).collect(ImmutableSet.toImmutableSet());
-    //     Set<Integer> adjacentNodes = this.state.getSetup().graph.adjacentNodes(mrXlocation);
-
-    //     // number of ajacent nodes
-    //     int nbrOfNodes = adjacentNodes.size(); // part of score
-
-    //     this.score += (nbrOfNodes * C); // 12
-
-    //     // dijkstra's algorithm
-    //     for (Integer detectiveLocation : detectiveLocations) {
-    //         // shortest path from mrX to detective
-    //         int shortestPath = this.ShortestPathFromSourceToDestination(this.state.getSetup().graph, detectiveLocation, mrXlocation);
-
-    //         // System.out.println("MrX: " + mrXlocation);
-    //         // System.out.println("Detective:" + detectiveLocation);
-    //         // System.out.println("Shortest Path:" + shortestPath);
-
-    //         this.score += shortestPath;
-
-    //         // check if mrX is in a position where he can be caught
-    //         if (adjacentNodes.contains(detectiveLocation)) {
-    //             this.score -= 1000;
-    //         }
-    //     }
-
-    //     // System.out.println("mrXLocation" + mrXlocation);
-    //     // System.out.println("Score after dijkstra's algorithm: " + this.score);
-
-    //     // tickets score
-    //     this.score += moveTicketScore(move);
-    //     // System.out.println("Score after ticket score " + this.score);
-
-
-    //     // winning state score
-    //     this.state.getWinner().forEach(winner -> {
-    //         if (winner == Piece.MrX.MRX) {
-    //             this.score += 200;
-    //         } else {
-    //             this.score -= 200;
-    //         }
-    //     });
-
-    //     // check if detective in adjacent nodes
-    //         // mrX is in a position where he can be caught
-
- 
-    // //    this.score = score;
-
-    //     // a good move for mrx is to get away from the detectives and be in a position with many options to move
-    //     // return score of the current board
-    //     // using this method we select the best move for mrX to take
-    // }
-
-
-    // get mrX location
-
-
+    // move filtering (try to se if it can be used separately)
     // TODO fix
     private Integer moveTicketScore(Move move) {
+        //! take scarcity into consideration
         return move.accept(new Move.Visitor<Integer>() {
             @Override
             public Integer visit(Move.SingleMove move) {
+                int multiplier = 10;
                 // return 20;
                 if (move.ticket == Ticket.TAXI)
-                    return 4;
+                    return 4*multiplier;
                 else if (move.ticket == Ticket.BUS)
-                    return 3;
+                    return 3*multiplier;
                 else if (move.ticket == Ticket.UNDERGROUND)
-                    return 2;
+                    return 2*multiplier;
                 else if (move.ticket == Ticket.SECRET) {
-                    return 1;
+                    // System.out.println(state.getRoundNumber());
+                    // System.out.println(state.getSetup().moves);
+
+                    int round = state.getRoundNumber();
+                    
+                    if (round > 1 && state.getSetup().moves.get(round-1-1)) {
+                        return 8*multiplier;
+                    } else {
+                        return 1*multiplier;
+                    }
                     // Boolean isRevealed = state.getSetup().moves.get(state.getMrXTravelLog().size());
                     // if (isRevealed) {
                     //     // System.out.println(lastLog.location().get());
@@ -249,8 +172,17 @@ public class Score {
                         score += 3;
                     else if (ticket == Ticket.UNDERGROUND)
                         score += 2;
-                    else if (ticket == Ticket.SECRET)
-                        score += 1;
+                    else if (ticket == Ticket.SECRET) {
+                        int round = state.getRoundNumber();
+                        // previous round was a reveawl lround
+                        if (round > 1  && state.getSetup().moves.get(round-1-1)) {
+                            score += 8;
+                        } else {
+                            score += 1;
+                        }
+
+                    }
+                        // score += 1;
                 }
                 return score;
 

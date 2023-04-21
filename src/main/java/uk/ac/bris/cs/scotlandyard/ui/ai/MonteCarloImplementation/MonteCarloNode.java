@@ -1,15 +1,12 @@
 package uk.ac.bris.cs.scotlandyard.ui.ai.MonteCarloImplementation;
 
-import java.text.NumberFormat.Style;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ImmutableSet;
 
 import uk.ac.bris.cs.scotlandyard.model.Move;
-import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
 import uk.ac.bris.cs.scotlandyard.ui.ai.State;
 
 public class MonteCarloNode {
@@ -89,7 +86,13 @@ public class MonteCarloNode {
 
         if(!this.isTerminalNode()) {
             for (Move m : this.gameState.getAvailableMoves()) {
-                State newState = this.gameState.advance(m);
+                State newState;
+                if (this.gameState.isMrxTurn()) {
+                    newState = this.gameState.advanceMrX(m);
+                } else {
+                    newState = this.gameState.advanceDetective(m);
+                }
+                // State newState = this.gameState.advance(m);
                 this.children.add(new MonteCarloNode(this, m, newState, newState.isMrxTurn()));
             }
         }
@@ -166,7 +169,13 @@ public class MonteCarloNode {
 
             Move randomMove = legalMoves.get(randomIndex);
 
-            state = state.advance(randomMove);
+            //! rewrite in state class to avoid redundancy
+            if (state.isMrxTurn()) {
+                state = state.advanceMrX(randomMove);
+            } else {
+                state = state.advanceDetective(randomMove);
+            }
+            // state = state.advance(randomMove);
         }
 
 
