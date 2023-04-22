@@ -1,4 +1,4 @@
-package uk.ac.bris.cs.scotlandyard.ui.ai;
+package uk.ac.bris.cs.scotlandyard.ui.ai.Score;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,6 +14,8 @@ import uk.ac.bris.cs.scotlandyard.model.Piece;
 import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Ticket;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Transport;
+import uk.ac.bris.cs.scotlandyard.ui.ai.State;
+import uk.ac.bris.cs.scotlandyard.ui.ai.State.winner;
 
 
 
@@ -21,12 +23,14 @@ public class Score {
     private int score;
     private int mrXlocation;
     private State state;
+    private int round;
     private Move move;
 
     // Constructor
-    public Score(Move move, State state, Boolean maximizingPlayer) {
+    public Score(Move move, State state, Boolean maximizingPlayer, int round) {
         this.move = move;
         this.state = state;
+        this.round = round;
 
         this.score = 0;
         this.mrXlocation = this.state.getMrXLocation();
@@ -37,6 +41,10 @@ public class Score {
     // Getters
     public int getScore() {
         return this.score;
+    }
+
+    public int getRound() {
+        return this.round;
     }
 
     public int getMrXLocation() {
@@ -133,7 +141,7 @@ public class Score {
                     // System.out.println(state.getRoundNumber());
                     // System.out.println(state.getSetup().moves);
 
-                    int round = state.getRoundNumber();
+                    // int round = state.getRoundNumber();
                     
                     if (round > 1 && state.getSetup().moves.get(round-1-1)) {
                         return 8*multiplier;
@@ -173,7 +181,7 @@ public class Score {
                     else if (ticket == Ticket.UNDERGROUND)
                         score += 2;
                     else if (ticket == Ticket.SECRET) {
-                        int round = state.getRoundNumber();
+                        // int round = state.getRoundNumber();
                         // previous round was a reveawl lround
                         if (round > 1  && state.getSetup().moves.get(round-1-1)) {
                             score += 8;

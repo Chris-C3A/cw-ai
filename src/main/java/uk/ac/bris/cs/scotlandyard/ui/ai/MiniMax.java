@@ -11,12 +11,13 @@ import com.google.errorprone.annotations.Immutable;
 import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.model.Piece;
 import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
+import uk.ac.bris.cs.scotlandyard.ui.ai.Score.Score;
 
 public class MiniMax {
     private int nb_of_runs = 0;
 
     // MiniMax algorithm
-    public int minimax(State state, Move move, int depth, int alpha, int beta) {
+    public int minimax(State state, Move move, int round, int depth, int alpha, int beta) {
         this.nb_of_runs++;
 
         Boolean isMrXTurn = state.isMrxTurn();        
@@ -26,7 +27,7 @@ public class MiniMax {
             // Score score = new Score(state, isMrXTurn);
             // score.setMove(move);
             // return score.getScore();
-            return new Score(move, state, isMrXTurn).getScore();
+            return new Score(move, state, isMrXTurn, round).getScore();
         }
 
         if (state.isMrxTurn()) {
@@ -35,7 +36,7 @@ public class MiniMax {
             for (Move nextMove : state.getAvailableMoves()) {
                 State nextState = state.advanceMrX(nextMove);
 
-                int eval = minimax(nextState, move, depth - 1, alpha, beta);
+                int eval = minimax(nextState, move, round, depth - 1, alpha, beta);
 
                 maxEval = Math.max(maxEval, eval);
                 alpha = Math.max(alpha, eval);
@@ -71,7 +72,8 @@ public class MiniMax {
                     .filter(m -> m.commencedBy().equals(detective))
                     .collect(Collectors.toList());
 
-                Move bestMove = detectiveMoves.get(0); //! get best move for detective (to implement later with dijkstra's algorithm)
+                // Move bestMove = detectiveMoves.get(0); //! get best move for detective (to implement later with dijkstra's algorithm)
+                Move bestMove = State.getDetectiveBestMove(detective, detectiveMoves, state); //! get best move for detective (to implement later with dijkstra's algorithm
 
                 bestMoves.add(bestMove);
 
@@ -92,7 +94,7 @@ public class MiniMax {
             for (Move nextMove : bestMoves) {
                 State nextState = state.advanceDetective(nextMove);
 
-                int eval = minimax(nextState, move, depth - 1, alpha, beta);
+                int eval = minimax(nextState, move, round, depth - 1, alpha, beta);
 
                 minEval = Math.min(minEval, eval);
                 beta = Math.min(beta, eval);

@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 import io.atlassian.fugue.Pair;
 import uk.ac.bris.cs.scotlandyard.model.*;
 import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
+import uk.ac.bris.cs.scotlandyard.ui.ai.Score.Score;
 
 public class LookAheadOneAI implements Ai {
 
@@ -30,7 +31,7 @@ public class LookAheadOneAI implements Ai {
         State nextState = state.advanceMrX(move);
 
         // get score of state
-        Score score = new Score(move, nextState, true);
+        Score score = new Score(move, nextState, true, nextState.getRoundNumber());
         // Score score = new Score(nextState, true);
 
         // update maxScore

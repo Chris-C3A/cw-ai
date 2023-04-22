@@ -12,6 +12,7 @@ import uk.ac.bris.cs.scotlandyard.model.GameSetup;
 import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.model.Piece;
 import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
+import uk.ac.bris.cs.scotlandyard.ui.ai.Score.ScoreDetective;
 
 public class State {
     private GameState board;
@@ -129,5 +130,25 @@ public class State {
         }
 
         return detectiveLocations;
+    }
+
+
+    public static Move getDetectiveBestMove(Piece detective, List<Move> detectiveMoves, State state) {
+        // get best move for detective
+        Move bestMove = null;
+        int bestScore = Integer.MAX_VALUE;
+
+        for (Move move : detectiveMoves) {
+            State newState = state.advanceDetective(move);
+            int score = new ScoreDetective(detective, move, newState).getScore();
+            // int score = 0;
+
+            if (score < bestScore) {
+                bestScore = score;
+                bestMove = move;
+            }
+        }
+
+        return bestMove;
     }
 }
