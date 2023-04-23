@@ -60,7 +60,7 @@ public class MrXAI implements Ai {
 
             // depth of 2 minimax
             // int score = miniMax.minimax(nextState, move, 4, Integer.MIN_VALUE, Integer.MAX_VALUE);
-            int score = miniMax.minimax(nextState, move, nextState.getRoundNumber(), 4, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            int score = miniMax.minimax(nextState, move, nextState.getRoundNumber(), 6, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
             if (score > maxScore) {
                 maxScore = score;

@@ -12,6 +12,7 @@ import uk.ac.bris.cs.scotlandyard.model.GameSetup;
 import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.model.Piece;
 import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
+import uk.ac.bris.cs.scotlandyard.model.Board.TicketBoard;
 import uk.ac.bris.cs.scotlandyard.ui.ai.Score.ScoreDetective;
 
 public class State {
@@ -90,6 +91,12 @@ public class State {
     // Boolean
     public boolean isTerminal() {
         return !this.board.getWinner().isEmpty();
+    }
+
+    // get player tickets
+    public Optional<TicketBoard> getPlayerTickets(Piece player) {
+        return this.board.getPlayerTickets(player);
+        // return this.board.getSetup().playerInfo.get(player).get().get(ticket);
     }
 
     // is mrX turn
