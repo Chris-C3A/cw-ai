@@ -5,6 +5,7 @@ import io.atlassian.fugue.Pair;
 import uk.ac.bris.cs.scotlandyard.model.Board;
 import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
+import uk.ac.bris.cs.scotlandyard.ui.ai.Minimax.MiniMax;
 
 import javax.annotation.Nonnull;
 import java.util.concurrent.TimeUnit;
@@ -59,7 +60,7 @@ public class MrXAI implements Ai {
 
             // depth of 2 minimax
             // int score = miniMax.minimax(nextState, move, 4, Integer.MIN_VALUE, Integer.MAX_VALUE);
-            int score = miniMax.minimax(nextState, move, nextState.getRoundNumber(), 3, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            int score = miniMax.minimax(nextState, move, nextState.getRoundNumber(), 4, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
             if (score > maxScore) {
                 maxScore = score;
@@ -67,6 +68,7 @@ public class MrXAI implements Ai {
             }
             // System.out.println("score: " + score + " move: " + move.toString());
         }
+
         //! idea: store all scores for each move
         //! filter moves based on round number (revealing round) filter out double moves unless its score is really high and other single moves are bad
         //! filter out secret moves unless its after a revealing round or its score is really high and other moves are bad
