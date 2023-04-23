@@ -171,8 +171,10 @@ public class MonteCarloNode {
 
             //! rewrite in state class to avoid redundancy
             if (state.isMrxTurn()) {
+                //! play mrx's best move (write in rollout policy)
                 state = state.advanceMrX(randomMove);
             } else {
+                //! play detective's best move (write in rollout policy)
                 state = state.advanceDetective(randomMove);
             }
             // state = state.advance(randomMove);

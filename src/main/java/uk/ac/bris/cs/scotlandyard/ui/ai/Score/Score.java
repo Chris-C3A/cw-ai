@@ -56,7 +56,7 @@ public class Score {
     public void scoreState() {
         // Constants
         // int C = 12;
-        int C = 6;
+        int C = 10;
 
         // get detective locations
         List<Integer> detectiveLocations = this.state.getDetectiveLocations();
@@ -83,7 +83,7 @@ public class Score {
             // get minimum distance from mrX to detective
             minDetectiveDistance = Math.min(minDetectiveDistance, shortestPath);
 
-            // this.score += shortestPath;
+            this.score += shortestPath;
 
             // check if mrX is in a position where he can be caught
             if (adjacentNodes.contains(detectiveLocation)) {
@@ -92,7 +92,7 @@ public class Score {
         }
 
         // add min detective distance to score
-        this.score += minDetectiveDistance;
+        // this.score += minDetectiveDistance;
 
         // tickets score
         this.score += moveTicketScore(move);
@@ -116,7 +116,7 @@ public class Score {
             public Integer visit(Move.SingleMove move) {
                 // multiplier constant for increase scoring for single moves
                 // increases the likely hood of mrX choosing a single move
-                int multiplier = 10;
+                int multiplier = 12;
                 if (move.ticket == Ticket.TAXI)
                     return 4*multiplier;
                 else if (move.ticket == Ticket.BUS)

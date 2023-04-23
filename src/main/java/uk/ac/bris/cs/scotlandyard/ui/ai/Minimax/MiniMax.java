@@ -26,6 +26,7 @@ public class MiniMax {
             // score.setMove(move);
             // return score.getScore();
             return new Score(move, state, isMrXTurn, round).getScore();
+            // return score.scoreState(state).getScore();
         }
 
         if (state.isMrxTurn()) {
@@ -90,6 +91,7 @@ public class MiniMax {
                     .collect(Collectors.toList());
 
                 // Move bestMove = detectiveMoves.get(0); //! get best move for detective (to implement later with dijkstra's algorithm)
+                //! test if selected move is the best move
                 Move bestMove = State.getDetectiveBestMove(detective, detectiveMoves, state); //! get best move for detective (to implement later with dijkstra's algorithm
 
                 bestMoves.add(bestMove);
@@ -127,8 +129,6 @@ public class MiniMax {
             int detectiveScore = new ScoreDetective(moveToPlay.commencedBy(), moveToPlay, nextState).getScore();
             // if (detectiveScore < beta) beta = detectiveScore;
             beta = Math.min(beta, detectiveScore);
-
-            System.out.println("Alpha: " + alpha + "Beta: " + beta);
 
 
             int eval = minimax(nextState, move, round, depth - 1, alpha, beta);
