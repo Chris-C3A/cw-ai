@@ -55,7 +55,7 @@ public class MiniMaxAI implements Ai {
 
             // depth of 6 minimax
             // get score of move using minimax with deph of 6
-            int score = miniMax.minimax(nextState, move, nextState.getRoundNumber(), 6, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            int score = miniMax.minimax(nextState, move, nextState.getRoundNumber(), 8, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
             // compare score and keep track of the best move
             if (score > maxScore) {

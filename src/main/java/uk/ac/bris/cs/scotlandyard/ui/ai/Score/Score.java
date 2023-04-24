@@ -56,7 +56,10 @@ public class Score {
     public void scoreState() {
         // Constants
         // int C = 12;
-        int C = 10;
+        // add score for nbr of nodes mrX can move to
+        // scores locations where mrX has more options to move to
+
+        // this.score += (nbrOfNodes * C); // 12
 
         // get detective locations
         List<Integer> detectiveLocations = this.state.getDetectiveLocations();
@@ -64,17 +67,12 @@ public class Score {
         // gets adjancent nodes to mrX location
         Set<Integer> adjacentNodes = this.state.getSetup().graph.adjacentNodes(mrXlocation);
 
-        // number of ajacent nodes
-        int nbrOfNodes = adjacentNodes.size(); // part of score
-
-        // add score for nbr of nodes mrX can move to
-        // scores locations where mrX has more options to move to
-        this.score += (nbrOfNodes * C); // 12
+        this.score += this.availableLocationsScore(adjacentNodes);
 
 
-        int minDetectiveDistance = Integer.MAX_VALUE;
         // dijkstra's algorithm
         // get shortest path from mrX to detectives
+        int minDetectiveDistance = Integer.MAX_VALUE;
         for (Integer detectiveLocation : detectiveLocations) {
 
             // shortest path from mrX to detective
@@ -104,6 +102,16 @@ public class Score {
         } else if (this.state.getWinner() == State.winner.Detectives) {
             this.score -= 2000;
         }
+    }
+
+    private Integer availableLocationsScore(Set<Integer> adjacentNodes) {
+        int C = 12;
+
+        // number of ajacent nodes
+        int nbrOfNodes = adjacentNodes.size(); // part of score
+
+        return nbrOfNodes * C;
+
     }
 
 
