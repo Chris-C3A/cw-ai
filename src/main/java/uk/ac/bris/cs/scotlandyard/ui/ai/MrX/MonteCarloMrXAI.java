@@ -1,4 +1,4 @@
-package uk.ac.bris.cs.scotlandyard.ui.ai;
+package uk.ac.bris.cs.scotlandyard.ui.ai.MrX;
 
 import java.util.concurrent.TimeUnit;
 
@@ -10,6 +10,7 @@ import uk.ac.bris.cs.scotlandyard.model.*;
 import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
 // import uk.ac.bris.cs.scotlandyard.ui.ai.MonteCarloTest.MonteCarlo;
 import uk.ac.bris.cs.scotlandyard.ui.ai.MonteCarloImplementation.MonteCarlo;
+import uk.ac.bris.cs.scotlandyard.ui.ai.State;
 
 public class MonteCarloMrXAI implements Ai {
 

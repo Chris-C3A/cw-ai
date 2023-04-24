@@ -1,10 +1,11 @@
-package uk.ac.bris.cs.scotlandyard.ui.ai;
+package uk.ac.bris.cs.scotlandyard.ui.ai.MrX;
 
 
 import io.atlassian.fugue.Pair;
 import uk.ac.bris.cs.scotlandyard.model.Board;
 import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
+import uk.ac.bris.cs.scotlandyard.ui.ai.State;
 import uk.ac.bris.cs.scotlandyard.ui.ai.Minimax.MiniMax;
 
 import javax.annotation.Nonnull;
@@ -14,59 +15,53 @@ import uk.ac.bris.cs.scotlandyard.model.*;
 
 // import uk.ac.bris.cs.scotlandyard.ui.ai.Score;
 
-public class MrXAI implements Ai {
+public class MiniMaxAI implements Ai {
 
     @Nonnull
     @Override 
-    public String name() { return "MrX Zabre AI"; }
+    public String name() { return "MiniMax MrX AI"; }
 
     @Nonnull
     @Override 
     public Move pickMove(@Nonnull Board board, Pair<Long, TimeUnit> timeoutPair) {
 
-        // GameState state = (GameState) board;
 
-
+        // Minimax class instance
         MiniMax miniMax = new MiniMax();
 
-        // AI implementations
-        // Scoring Function
-        // MiniMax algorithm
-        // montecarlo
 
+        // initilaize maxScore and bestMove
         int maxScore = Integer.MIN_VALUE;
         Move bestMove = null;
 
         // get available moves for mrX in current round
         var moves = board.getAvailableMoves().asList();
 
+        // get mrX's location from available moves source location
         int mrXLocation = moves.get(0).source();
+
+        // create new state Object with the current board state and mrX's location
         State state = new State((GameState) board, mrXLocation);
 
 
-
-        // miniMax.minimax(state, mrXLocation, 1, Integer.MIN_VALUE, Integer.MAX_VALUE, false);
-
-
-        // ! minimax implementation
-        // int score = miniMax.minimax(state, 3, Integer.MIN_VALUE, Integer.MAX_VALUE);
-        // System.out.println("score: " + score);
+        // * minimax implementation
+        // go through all available moves
         for (Move move: moves) {
+            // get nextState
             State nextState = state.advanceMrX(move);
 
-            // Test
-            // LogEntry mrXLocationTest = nextState.getBoard().getMrXTravelLog().get(nextState.getMrXTravelLog().size()-1);
-            // System.out.println("location from log:" + mrXLocationTest.location().isEmpty());
 
-            // depth of 2 minimax
             // int score = miniMax.minimax(nextState, move, 4, Integer.MIN_VALUE, Integer.MAX_VALUE);
-            int score = miniMax.minimax(nextState, move, nextState.getRoundNumber(), 6, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
+            // depth of 6 minimax
+            // get score of move using minimax with deph of 6
+            int score = miniMax.minimax(nextState, move, nextState.getRoundNumber(), 8, Integer.MIN_VALUE, Integer.MAX_VALUE);
+
+            // compare score and keep track of the best move
             if (score > maxScore) {
                 maxScore = score;
                 bestMove = move;
             }
-            // System.out.println("score: " + score + " move: " + move.toString());
         }
 
         //! idea: store all scores for each move
@@ -81,7 +76,6 @@ public class MrXAI implements Ai {
 
 
         return bestMove;
-        // return moves.get(0);
     }
 
 }

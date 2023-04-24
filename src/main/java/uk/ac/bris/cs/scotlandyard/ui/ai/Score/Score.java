@@ -56,7 +56,10 @@ public class Score {
     public void scoreState() {
         // Constants
         // int C = 12;
-        int C = 6;
+        // add score for nbr of nodes mrX can move to
+        // scores locations where mrX has more options to move to
+
+        // this.score += (nbrOfNodes * C); // 12
 
         // get detective locations
         List<Integer> detectiveLocations = this.state.getDetectiveLocations();
@@ -64,17 +67,12 @@ public class Score {
         // gets adjancent nodes to mrX location
         Set<Integer> adjacentNodes = this.state.getSetup().graph.adjacentNodes(mrXlocation);
 
-        // number of ajacent nodes
-        int nbrOfNodes = adjacentNodes.size(); // part of score
-
-        // add score for nbr of nodes mrX can move to
-        // scores locations where mrX has more options to move to
-        this.score += (nbrOfNodes * C); // 12
+        this.score += this.availableLocationsScore(adjacentNodes);
 
 
-        int minDetectiveDistance = Integer.MAX_VALUE;
         // dijkstra's algorithm
         // get shortest path from mrX to detectives
+        int minDetectiveDistance = Integer.MAX_VALUE;
         for (Integer detectiveLocation : detectiveLocations) {
 
             // shortest path from mrX to detective
@@ -83,7 +81,7 @@ public class Score {
             // get minimum distance from mrX to detective
             minDetectiveDistance = Math.min(minDetectiveDistance, shortestPath);
 
-            // this.score += shortestPath;
+            this.score += shortestPath;
 
             // check if mrX is in a position where he can be caught
             if (adjacentNodes.contains(detectiveLocation)) {
@@ -92,7 +90,7 @@ public class Score {
         }
 
         // add min detective distance to score
-        this.score += minDetectiveDistance;
+        // this.score += minDetectiveDistance;
 
         // tickets score
         this.score += moveTicketScore(move);
@@ -106,6 +104,16 @@ public class Score {
         }
     }
 
+    private Integer availableLocationsScore(Set<Integer> adjacentNodes) {
+        int C = 12;
+
+        // number of ajacent nodes
+        int nbrOfNodes = adjacentNodes.size(); // part of score
+
+        return nbrOfNodes * C;
+
+    }
+
 
 
     //! move filtering (try to se if it can be used separately)
@@ -116,7 +124,7 @@ public class Score {
             public Integer visit(Move.SingleMove move) {
                 // multiplier constant for increase scoring for single moves
                 // increases the likely hood of mrX choosing a single move
-                int multiplier = 10;
+                int multiplier = 12;
                 if (move.ticket == Ticket.TAXI)
                     return 4*multiplier;
                 else if (move.ticket == Ticket.BUS)

@@ -1,4 +1,4 @@
-package uk.ac.bris.cs.scotlandyard.ui.ai;
+package uk.ac.bris.cs.scotlandyard.ui.ai.MrX;
 
 import java.util.concurrent.TimeUnit;
 
@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 import io.atlassian.fugue.Pair;
 import uk.ac.bris.cs.scotlandyard.model.*;
 import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
+import uk.ac.bris.cs.scotlandyard.ui.ai.State;
 import uk.ac.bris.cs.scotlandyard.ui.ai.Score.Score;
 
 public class LookAheadOneAI implements Ai {
