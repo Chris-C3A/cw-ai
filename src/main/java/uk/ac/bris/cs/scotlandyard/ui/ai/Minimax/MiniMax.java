@@ -128,12 +128,15 @@ public class MiniMax {
 
             int detectiveScore = new ScoreDetective(moveToPlay.commencedBy(), moveToPlay, nextState).getScore();
             // if (detectiveScore < beta) beta = detectiveScore;
-            beta = Math.min(beta, detectiveScore);
+
+            // beta = Math.min(beta, detectiveScore);
 
 
             int eval = minimax(nextState, move, round, depth - 1, alpha, beta);
+
             // minEval = Math.min(minEval, eval);
             // beta = Math.min(beta, eval);
+            beta = Math.min(beta, detectiveScore);
 
 
             // return minEval;

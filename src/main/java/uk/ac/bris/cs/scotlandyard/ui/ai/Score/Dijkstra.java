@@ -67,49 +67,53 @@ public class Dijkstra {
       }
 
       return -1;
-  }
+    }
 
-  // helper function for dijkstra's algorithm
-	private static int findMinDistance(Integer[] distance, Boolean[] visitedVertex) {
-		int minDistance = Integer.MAX_VALUE;
-		int minDistanceVertex = -1;
+    // helper function for dijkstra's algorithm
+    private static int findMinDistance(Integer[] distance, Boolean[] visitedVertex) {
+        int minDistance = Integer.MAX_VALUE;
+        int minDistanceVertex = -1;
 
-		for (int i = 0; i < distance.length; i++) {
-			if (!visitedVertex[i] && distance[i] < minDistance) {
-				minDistance = distance[i];
-				minDistanceVertex = i;
-			}
-		}
+        for (int i = 0; i < distance.length; i++) {
+            if (!visitedVertex[i] && distance[i] < minDistance) {
+                minDistance = distance[i];
+                minDistanceVertex = i;
+            }
+        }
 
-		return minDistanceVertex;
-	}
+        return minDistanceVertex;
+    }
 
-  //! refactor values
-  private static int getTransportsWeight(ImmutableSet<Transport> transports) {
-      Integer weight = Integer.MAX_VALUE;
+    //! refactor values
+    /**
+     * @param transports
+     * @return the minimum weight of the transports
+     */
+    private static int getTransportsWeight(ImmutableSet<Transport> transports) {
+        Integer weight = Integer.MAX_VALUE;
 
-      for (Transport transport : transports) {
-          Integer transportWeight = 0;
-          switch (transport.requiredTicket()) {
-              case TAXI:
-                  transportWeight = 1;
-                  break;
-              case BUS:
-                  transportWeight = 2;
-                  break;
-              case UNDERGROUND:
-                  transportWeight = 4;
-                  break;
-              case SECRET:
-                  transportWeight = 4;
-                  break;
-              case DOUBLE:
-                  transportWeight = 8;
-                  break;
-          }
-          weight = Math.min(weight, transportWeight);
-      }
+        for (Transport transport : transports) {
+            Integer transportWeight = 0;
+            switch (transport.requiredTicket()) {
+                case TAXI:
+                    transportWeight = 1;
+                    break;
+                case BUS:
+                    transportWeight = 2;
+                    break;
+                case UNDERGROUND:
+                    transportWeight = 4;
+                    break;
+                case SECRET:
+                    transportWeight = 4;
+                    break;
+                case DOUBLE:
+                    transportWeight = 8;
+                    break;
+            }
+            weight = Math.min(weight, transportWeight);
+        }
 
-      return weight;
-  }
+        return weight;
+    }
 }

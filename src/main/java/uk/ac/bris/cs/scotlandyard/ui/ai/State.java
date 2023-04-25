@@ -1,6 +1,5 @@
 package uk.ac.bris.cs.scotlandyard.ui.ai;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -20,17 +19,31 @@ public class State {
     private int mrXLocation;
 
 
+    // Constructor
+    /**
+     * @param board
+     * @param mrXLocation
+     */
     public State(GameState board, int mrXLocation) {
         this.board = board;
         this.mrXLocation = mrXLocation;
     }
 
-
+    /**
+     * @return Set of detective pieces
+     */
     public Set<Piece> getDetectivePieces() {
-        return this.board.getPlayers().stream().filter(player -> player.isDetective()).collect(Collectors.toSet());
+        return this.board.getPlayers()
+            .stream()
+            .filter(player -> player.isDetective())
+            .collect(Collectors.toSet());
     }
 
-    // advances mrX move and returns a new state
+    /**
+     * advances mrX move and returns a new state
+     * @param move
+     * @return new State
+     */
     public State advanceMrX(Move move) {
         return new State(this.board.advance(move), move.accept(new Move.Visitor<Integer>() {
             @Override
@@ -45,7 +58,11 @@ public class State {
         }));
     }
 
-    // advances detective move and returns a new state with previous mrX location
+    /**
+     * advances detective move and returns a new state with previous mrX location
+     * @param move
+     * @return new State
+     */
     public State advanceDetective(Move move) {
         return new State(this.board.advance(move), this.getMrXLocation());
     }
@@ -68,16 +85,6 @@ public class State {
     }    
 
 
-    // returns a list of possible states
-    public List<State> getPossibleStates() {
-        if (this.isMrxTurn()) {
-            return this.getAvailableMoves().stream().map(move -> this.advanceMrX(move)).collect(Collectors.toList());
-        } else {
-            return this.getAvailableMoves().stream().map(move -> this.advanceDetective(move)).collect(Collectors.toList());
-        }
-        // return this.board.getAvailableMoves().stream().map(move -> new State(this.board.advance(move))).collect(Collectors.toList());
-    }
-
     // current round number
     public int getRoundNumber() {
         return this.board.getMrXTravelLog().size();
@@ -88,7 +95,9 @@ public class State {
         return this.board.getSetup().moves.size();
     }
 
-    // Boolean
+    /**
+     * @return true if state is terminal (game over)
+     */
     public boolean isTerminal() {
         return !this.board.getWinner().isEmpty();
     }
@@ -96,13 +105,15 @@ public class State {
     // get player tickets
     public Optional<TicketBoard> getPlayerTickets(Piece player) {
         return this.board.getPlayerTickets(player);
-        // return this.board.getSetup().playerInfo.get(player).get().get(ticket);
     }
 
-    // is mrX turn
-    // returns if current state is mrX turn
+    /**
+     * @return true if mrX turn
+     */
     public boolean isMrxTurn() {
-        return this.board.getAvailableMoves().stream().allMatch(move -> move.commencedBy().isMrX());
+        return this.board.getAvailableMoves()
+        .stream()
+        .allMatch(move -> move.commencedBy().isMrX());
     }
 
 
@@ -113,7 +124,9 @@ public class State {
         None
     }
 
-    // returns winner of state (MrX, Detectives, None) if winner exists
+    /**
+     * @return winner of state (MrX, Detectives, None)
+     */
     public winner getWinner() {
         if (this.board.getWinner().contains(Piece.MrX.MRX)) {
             return winner.MrX;
@@ -124,7 +137,9 @@ public class State {
         }
     }
 
-    // ! write in functional style
+    /**
+     * @return List of detective locations
+     */
     public List<Integer> getDetectiveLocations() {
         return this.getDetectivePieces()
         .stream()
@@ -132,21 +147,11 @@ public class State {
         .filter(location -> location.isPresent())
         .map(location -> location.get())
         .collect(Collectors.toList());
-        // List<Integer> detectiveLocations = new ArrayList<Integer>();
-        // // get player locations
-        // for (Piece detective : this.getDetectivePieces()) {
-        //     Optional<Integer> location = this.getBoard().getDetectiveLocation((Piece.Detective) detective);
-
-        //     if (location.isPresent()) {
-        //         detectiveLocations.add(location.get());
-        //     }
-        // }
-
-        // return detectiveLocations;
     }
 
 
-    // Static methods
+    /* Static methods */
+
     /**
      * @param detective
      * @param detectiveMoves
@@ -154,23 +159,18 @@ public class State {
      * @return Move best move for detective
      */
     public static Move getDetectiveBestMove(Piece detective, List<Move> detectiveMoves, State state) {
-        // get best move for detective
         Move bestMove = null;
         int bestScore = Integer.MIN_VALUE;
 
         for (Move move : detectiveMoves) {
             State newState = state.advanceDetective(move);
             int score = new ScoreDetective(detective, move, newState).getScore();
-            // int score = 0;
 
             if (score > bestScore) {
                 bestScore = score;
                 bestMove = move;
             }
         }
-
-        // System.out.println("MrX's Locaiton:" + state.getMrXLocation());
-        // System.out.println("Best Detective move: " + bestMove.toString());
 
         return bestMove;
     }

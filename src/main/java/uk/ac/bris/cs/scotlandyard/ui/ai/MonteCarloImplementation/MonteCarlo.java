@@ -18,15 +18,12 @@ public class MonteCarlo {
 
     public MonteCarlo(State state, Boolean player) {
         this.state = state;
-        // this.game = view.getGame();
-        // this.player = player;
-        // this.rootNode = new MonteCarloNode(null, null, state, state.getPossibleStates(), player);
         this.rootNode = new MonteCarloNode(null, null, state, state.isMrxTurn());
     }
 
     // public Move findNextMove(int iterations) {
     public Move findNextMove(Pair<Long, TimeUnit> simulationTime) {
-      long endTime = System.currentTimeMillis()+simulationTime.right().toMillis(simulationTime.left());
+      long endTime = System.currentTimeMillis()+simulationTime.right().toMillis(simulationTime.left())-1000;
       long currentTime = System.currentTimeMillis();
       // for (int i = 0; i < iterations; i++) {
       while (currentTime < endTime) {

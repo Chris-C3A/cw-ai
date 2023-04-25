@@ -43,19 +43,7 @@ public class Score {
         return this.mrXlocation;
     }
 
-    // public Move getMove() {
-    //     return this.move;
-    // }
-
-    public void scoreDetectives(Move move, GameState state) {
-        // get mrX location from travel log
-        int mrXLocation = state.getMrXTravelLog().get(state.getMrXTravelLog().size() - 1).location().get();
-        System.out.println(mrXLocation);
-    }
-
     public void scoreState() {
-        // Constants
-        // int C = 12;
         // add score for nbr of nodes mrX can move to
         // scores locations where mrX has more options to move to
 
@@ -81,7 +69,7 @@ public class Score {
             // get minimum distance from mrX to detective
             minDetectiveDistance = Math.min(minDetectiveDistance, shortestPath);
 
-            this.score += shortestPath;
+            // this.score += shortestPath;
 
             // check if mrX is in a position where he can be caught
             if (adjacentNodes.contains(detectiveLocation)) {
@@ -90,7 +78,8 @@ public class Score {
         }
 
         // add min detective distance to score
-        // this.score += minDetectiveDistance;
+        // this.score += Math.pow(minDetectiveDistance, 2);
+        this.score += minDetectiveDistance * 10;
 
         // tickets score
         this.score += moveTicketScore(move);
@@ -105,7 +94,7 @@ public class Score {
     }
 
     private Integer availableLocationsScore(Set<Integer> adjacentNodes) {
-        int C = 12;
+        int C = 10;
 
         // number of ajacent nodes
         int nbrOfNodes = adjacentNodes.size(); // part of score
@@ -119,61 +108,63 @@ public class Score {
     //! move filtering (try to se if it can be used separately)
     private Integer moveTicketScore(Move move) {
         //! take scarcity into consideration
-        return move.accept(new Move.Visitor<Integer>() {
-            @Override
-            public Integer visit(Move.SingleMove move) {
-                // multiplier constant for increase scoring for single moves
-                // increases the likely hood of mrX choosing a single move
-                int multiplier = 12;
-                if (move.ticket == Ticket.TAXI)
-                    return 4*multiplier;
-                else if (move.ticket == Ticket.BUS)
-                    return 3*multiplier;
-                else if (move.ticket == Ticket.UNDERGROUND)
-                    return 2*multiplier;
-                else if (move.ticket == Ticket.SECRET) {
-                    
-                    // check if previous round was revealed
-                    if (round > 1 && state.getSetup().moves.get(round-1-1)) {
-                        // increase score for secret ticket if previous round was revealed
-                        return 8*multiplier;
-                    } else {
-                        return 1*multiplier;
-                    }
-                }
-                else
-                    return 0;
-            }
-
-            @Override
-            public Integer visit(Move.DoubleMove move) {
-                // return 5;
-                int score = 0;
-                for (Ticket ticket : move.tickets()) {
-                    if (ticket == Ticket.TAXI)
-                        score += 4;
-                    else if (ticket == Ticket.BUS)
-                        score += 3;
-                    else if (ticket == Ticket.UNDERGROUND)
-                        score += 2;
-                    else if (ticket == Ticket.SECRET) {
-                        // check if previous round was revealed
-                        // Boolean previousRoundRevealed = state.getSetup().moves.get(round-2);
-                        if (round > 1  && state.getSetup().moves.get(round-1-1)) {
-                            // increase score for secret ticket if previous round was revealed
-                            score += 8;
-                        } else {
-                            score += 1;
-                        }
-
-                    }
-                }
-                return score;
-            }
-        });
+        return move.accept(new MoveTicketVisitor());
     }
 
 
+    // MoveTicketVisitor class implements Move.Visitor 
+    private class MoveTicketVisitor implements Move.Visitor<Integer> {
+        @Override
+        public Integer visit(Move.SingleMove move) {
+            // multiplier constant for increase scoring for single moves
+            // increases the likely hood of mrX choosing a single move
+            int multiplier = 25;
+            if (move.ticket == Ticket.TAXI)
+                return 4*multiplier;
+            else if (move.ticket == Ticket.BUS)
+                return 4*multiplier;
+            else if (move.ticket == Ticket.UNDERGROUND)
+                return 4*multiplier;
+            else if (move.ticket == Ticket.SECRET) {
+                
+                // check if previous round was revealed
+                if (round > 1 && state.getSetup().moves.get(round-1-1)) {
+                    // increase score for secret ticket if previous round was revealed
+                    return 8*multiplier;
+                } else {
+                    return 1*multiplier;
+                }
+            }
+            else
+                return 0;
+        }
+
+        @Override
+        public Integer visit(Move.DoubleMove move) {
+            // return 5;
+            int score = 0;
+            for (Ticket ticket : move.tickets()) {
+                if (ticket == Ticket.TAXI)
+                    score += 4;
+                else if (ticket == Ticket.BUS)
+                    score += 3;
+                else if (ticket == Ticket.UNDERGROUND)
+                    score += 2;
+                else if (ticket == Ticket.SECRET) {
+                    // check if previous round was revealed
+                    // Boolean previousRoundRevealed = state.getSetup().moves.get(round-2);
+                    if (round > 1  && state.getSetup().moves.get(round-1-1)) {
+                        // increase score for secret ticket if previous round was revealed
+                        score += 8;
+                    } else {
+                        score += 1;
+                    }
+
+                }
+            }
+            return score;
+        }
+    }
 
   
 }

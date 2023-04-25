@@ -36,7 +36,7 @@ public class ScoreDetective {
         }
         // higher score if closer to mrX
         // inverses distance so that the closer the detective is to mrX the higher the score
-        this.score += (1/detectiveDistanceToMrX) * 100;
+        this.score = (1/detectiveDistanceToMrX) * 100;
     }
 
     public int getScore() {

@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import org.glassfish.grizzly.http.server.StaticHttpHandler;
 
 import uk.ac.bris.cs.scotlandyard.model.Move;
+import uk.ac.bris.cs.scotlandyard.model.Piece;
 import uk.ac.bris.cs.scotlandyard.ui.ai.State;
 
 public class MonteCarloNode {
@@ -134,7 +136,8 @@ public class MonteCarloNode {
         double maxScore = Double.MIN_VALUE;
 
         for (MonteCarloNode child : children) {
-            double childScore = child.getAverageScore();
+            // double childScore = child.getAverageScore();
+            double childScore = child.getPlays();
 
             if (childScore > maxScore) {
                 best = child;
@@ -146,44 +149,67 @@ public class MonteCarloNode {
     }
 
     // get moves for rollout policy
-    // public Move rolloutPolicy(State state) {
-    //     Random rand = new Random();
-    //     List<Move> legalMoves = state.getAvailableMoves().stream().collect(Collectors.toList());
-    //     int randomIndex = rand.nextInt(legalMoves.size());
-    //     Move randomMove = legalMoves.get(randomIndex);
-    //     return randomMove;
-    // }
+    public Move rolloutPolicy(State state) {
+        Random rand = new Random();
+        List<Move> legalMoves = state.getAvailableMoves().stream().collect(Collectors.toList());
+        int randomIndex = rand.nextInt(legalMoves.size());
+        Move randomMove = legalMoves.get(randomIndex);
+        return randomMove;
+    }
+
+    public Move biasedRolloutPolicy(State state) {
+        List<Move> legalMoves = state.getAvailableMoves().stream().collect(Collectors.toList());
+        if (state.isMrxTurn()) {
+            Random rand = new Random();
+            int randomIndex = rand.nextInt(legalMoves.size());
+            Move randomMove = legalMoves.get(randomIndex);
+            return randomMove;
+
+        } else {
+            Piece detective = legalMoves.get(0).commencedBy();
+            return State.getDetectiveBestMove(detective, legalMoves, state);
+        }
+
+    }
     
     // Perform a random simulation from this node
     public double simulate() {
-        Random rand = new Random();
+        // Random rand = new Random();
 
         State state = this.gameState;
 
         // rollout policy
         // play until end of game
         while (state.getBoard().getWinner().isEmpty()) {
-            List<Move> legalMoves = state.getAvailableMoves().stream().collect(Collectors.toList());
-
-            int randomIndex = rand.nextInt(legalMoves.size());
-
-            Move randomMove = legalMoves.get(randomIndex);
-
-            //! rewrite in state class to avoid redundancy
             if (state.isMrxTurn()) {
-                //! play mrx's best move (write in rollout policy)
-                state = state.advanceMrX(randomMove);
+                // state = state.advanceMrX(rolloutPolicy(state));
+                state = state.advanceMrX(biasedRolloutPolicy(state));
             } else {
-                //! play detective's best move (write in rollout policy)
-                state = state.advanceDetective(randomMove);
+                // state = state.advanceDetective(rolloutPolicy(state));
+                state = state.advanceDetective(biasedRolloutPolicy(state));
             }
-            // state = state.advance(randomMove);
+            // List<Move> legalMoves = state.getAvailableMoves().stream().collect(Collectors.toList());
+
+            // int randomIndex = rand.nextInt(legalMoves.size());
+
+            // Move randomMove = legalMoves.get(randomIndex);
+
+            // //! rewrite in state class to avoid redundancy
+            // if (state.isMrxTurn()) {
+            //     //! play mrx's best move (write in rollout policy)
+            //     state = state.advanceMrX(randomMove);
+            // } else {
+            //     //! play detective's best move (write in rollout policy)
+            //     state = state.advanceDetective(randomMove);
+            // }
         }
 
 
         if (state.getWinner() == State.winner.MrX) {
+            // return 1;
             return state.getTotalRounds();
         } else {
+            // return -1;
             return state.getRoundNumber();
         }
         // if(rollingMiniBoard.getWinner() == MiniBoard.winner.MRX) return getRoundSize()+1;
