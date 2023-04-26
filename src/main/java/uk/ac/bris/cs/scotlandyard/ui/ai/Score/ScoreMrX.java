@@ -94,7 +94,7 @@ public class ScoreMrX implements ScoreHeuristic {
 
     private Integer availableLocationsScore(Set<Integer> adjacentNodes) {
         // int C = 12;
-        int C = 10;
+        int C = 12;
 
         // number of ajacent nodes
         int nbrOfNodes = adjacentNodes.size(); // part of score
@@ -123,7 +123,7 @@ public class ScoreMrX implements ScoreHeuristic {
         public Integer visit(Move.SingleMove move) {
             // multiplier constant for increase scoring for single moves
             // increases the likely hood of mrX choosing a single move
-            int multiplier = 25;
+            int multiplier = 35;
 
             if (move.ticket == Ticket.TAXI)
                 return 4*multiplier;
