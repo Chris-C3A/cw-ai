@@ -49,29 +49,40 @@ public class MiniMax {
 
             return maxEval;
         } else {
+            // get remaining detective pieces
             List<Piece> remainingDetectivePieces = state.getRemainingDetectivePieces();
 
+            // initialize bestMoves list
             List<Move> bestMoves = new ArrayList<>();
+
+            // go through all remaining detective pieces
             for (Piece detective : remainingDetectivePieces) {
                 // get detective moves
                 List<Move> detectiveMoves = state.getAvailableMoves().stream()
                     .filter(m -> m.commencedBy().equals(detective))
                     .collect(Collectors.toList());
 
+                // get best move for detective
                 Move bestMove = State.getDetectiveBestMove(detective, detectiveMoves, state);
 
+                // add best move to bestMoves list
                 bestMoves.add(bestMove);
 
             }
 
+            // get first best move
             Move moveToPlay = bestMoves.get(0);
 
+            // play move
             State nextState = state.advanceDetective(moveToPlay);
 
+            // get score of detective
             int detectiveScore = new ScoreDetective(moveToPlay.commencedBy(), moveToPlay, nextState).getScore();
 
+            // update beta
             beta = Math.min(beta, detectiveScore);
 
+            // recursive call to minimax
             int eval = minimax(nextState, move, round, depth - 1, alpha, beta);
 
             return eval;
