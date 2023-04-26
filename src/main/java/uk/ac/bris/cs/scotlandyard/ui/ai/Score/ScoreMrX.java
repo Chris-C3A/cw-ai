@@ -69,14 +69,16 @@ public class ScoreMrX implements ScoreHeuristic {
             // get minimum distance from mrX to detective
             minDetectiveDistance = Math.min(minDetectiveDistance, shortestPath);
 
+            this.score += shortestPath;
+
             // check if mrX is in a position where he can be caught
             if (adjacentNodes.contains(detectiveLocation)) {
                 this.score -= 1000;
             }
         }
 
-        // add min detective distance to score * 10
-        this.score += minDetectiveDistance * 10;
+        // add min detective distance to score * 20
+        // this.score += minDetectiveDistance * 10;
 
         // tickets score
         this.score += moveTicketScore(move);
@@ -120,16 +122,16 @@ public class ScoreMrX implements ScoreHeuristic {
         public Integer visit(Move.SingleMove move) {
             // multiplier constant for increase scoring for single moves
             // increases the likely hood of mrX choosing a single move
-            int multiplier = 30;
+            int multiplier = 50;
 
             if (move.ticket == Ticket.TAXI)
-                return multiplier;
+                return 4*multiplier;
                 // return TicketWeight.TAXI.getValue() * multiplier;
             else if (move.ticket == Ticket.BUS)
-                return multiplier;
+                return 4*multiplier;
                 // return TicketWeight.BUS.getValue() * multiplier;
             else if (move.ticket == Ticket.UNDERGROUND)
-                return multiplier;
+                return 4*multiplier;
                 // return TicketWeight.UNDERGROUND.getValue() * multiplier;
             else if (move.ticket == Ticket.SECRET) {
                 

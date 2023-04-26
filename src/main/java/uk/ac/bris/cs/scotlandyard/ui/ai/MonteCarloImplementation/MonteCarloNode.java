@@ -5,11 +5,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.glassfish.grizzly.http.server.StaticHttpHandler;
-
 import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.model.Piece;
-import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Ticket;
 import uk.ac.bris.cs.scotlandyard.ui.ai.State;
 
 public class MonteCarloNode {
@@ -38,9 +35,6 @@ public class MonteCarloNode {
         this.children = new ArrayList<>();
 
         this.ismrX = ismrX;
-
-        // this.availableMoves = availableMoves; //! probably keep available moves since we keep track of the move for each node
-        // this.possibleStates = possibleStates;
     }
 
     public Boolean isTerminalNode() {
@@ -75,10 +69,6 @@ public class MonteCarloNode {
                 bestUCBValue = ucbValue;
             }
         }
-
-        // if (selected == null) {
-        //     return this;
-        // }
 
         return selected;
     }
@@ -122,8 +112,6 @@ public class MonteCarloNode {
         double exploitation = this.score / this.n_plays;
         double exploration = Math.sqrt(Math.log(this.parent.getPlays()) / this.n_plays);
 
-        // double domainKnowledge = 0.0; // Domain knowledge constant //! to implement
-
         double C = 3.0; // Exploration constant
 
         return exploitation + C * exploration;
@@ -157,6 +145,7 @@ public class MonteCarloNode {
         return randomMove;
     }
 
+    // biased rollout policy
     public Move biasedRolloutPolicy(State state) {
         List<Move> legalMoves = state.getAvailableMoves().stream().collect(Collectors.toList());
         if (state.isMrxTurn()) {
