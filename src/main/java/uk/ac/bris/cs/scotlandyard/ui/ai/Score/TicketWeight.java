@@ -4,7 +4,7 @@ package uk.ac.bris.cs.scotlandyard.ui.ai.Score;
  * Enum for ticket weights
  */
 public enum TicketWeight {
-    SECRET_HEAVY(8),
+    SECRET_HEAVY(10),
     TAXI(4),
     BUS(3),
     UNDERGROUND(2),
