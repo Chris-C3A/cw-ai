@@ -44,14 +44,14 @@ public class MiniMaxAI implements Ai {
         State state = new State((GameState) board, mrXLocation);
 
 
+        long start_time = System.currentTimeMillis();
+
         // * minimax implementation
         // go through all available moves
         for (Move move: moves) {
             // get nextState
             State nextState = state.advanceMrX(move);
 
-
-            // int score = miniMax.minimax(nextState, move, 4, Integer.MIN_VALUE, Integer.MAX_VALUE);
 
             // depth of 6 minimax
             // get score of move using minimax with deph of 6
@@ -64,15 +64,13 @@ public class MiniMaxAI implements Ai {
             }
         }
 
-        //! idea: store all scores for each move
-        //! filter moves based on round number (revealing round) filter out double moves unless its score is really high and other single moves are bad
-        //! filter out secret moves unless its after a revealing round or its score is really high and other moves are bad
-
 
         System.out.println("nbr of runs: " + miniMax.getNumberOfRuns());
 
         System.out.println("best move:");
         System.out.println(bestMove.toString() + " score: " + maxScore);
+
+        System.out.println("Execution time: " + (System.currentTimeMillis() - start_time) + "ms");
 
 
         return bestMove;

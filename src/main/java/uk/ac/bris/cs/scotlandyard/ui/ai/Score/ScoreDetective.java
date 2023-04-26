@@ -5,7 +5,7 @@ import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.model.Piece;
 import uk.ac.bris.cs.scotlandyard.ui.ai.State;
 
-public class ScoreDetective {
+public class ScoreDetective implements ScoreHeuristic {
     private int score;
     private int mrXlocation;
     private int detectiveLocation;
@@ -17,11 +17,14 @@ public class ScoreDetective {
         this.move = move;
         this.state = state;
 
+        // get detective location
         this.detectiveLocation = this.state.getBoard().getDetectiveLocation((Piece.Detective) detective).get();
 
         this.score = 0;
+        // get mrX location from current state
         this.mrXlocation = this.state.getMrXLocation();
 
+        // score state
         this.scoreState();
     }
 
@@ -36,7 +39,7 @@ public class ScoreDetective {
         }
         // higher score if closer to mrX
         // inverses distance so that the closer the detective is to mrX the higher the score
-        this.score += (1/detectiveDistanceToMrX) * 100;
+        this.score = (1/detectiveDistanceToMrX) * 100;
     }
 
     public int getScore() {

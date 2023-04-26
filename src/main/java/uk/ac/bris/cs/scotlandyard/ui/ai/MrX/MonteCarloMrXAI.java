@@ -19,19 +19,15 @@ public class MonteCarloMrXAI implements Ai {
   @Nonnull
   @Override
   public Move pickMove(@Nonnull Board board, Pair<Long, TimeUnit> timeoutPair) {
-    // GameState state = (GameState) board;
     State state = new State((GameState) board, board.getAvailableMoves().asList().get(0).source());
 
+    // MonteCarlo class instance
     MonteCarlo monteCarlo = new MonteCarlo(state, true);
-
+ 
     Move bestMove = monteCarlo.findNextMove(timeoutPair);
 
     System.out.println("Best Move: " + bestMove.toString());
     return bestMove;
-
-		// var moves = state.getAvailableMoves().asList();
-		// return moves.get(new Random().nextInt(moves.size()));
-
 	}
 
 }
