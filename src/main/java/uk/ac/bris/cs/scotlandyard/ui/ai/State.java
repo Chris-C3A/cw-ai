@@ -13,6 +13,7 @@ import uk.ac.bris.cs.scotlandyard.model.Piece;
 import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
 import uk.ac.bris.cs.scotlandyard.model.Board.TicketBoard;
 import uk.ac.bris.cs.scotlandyard.ui.ai.Score.ScoreDetective;
+import uk.ac.bris.cs.scotlandyard.ui.ai.Score.ScoreMrX;
 
 public class State {
     private GameState board;
@@ -67,7 +68,7 @@ public class State {
         return new State(this.board.advance(move), this.getMrXLocation());
     }
 
-    // Getters
+    /* Getters */
     public GameState getBoard() {
         return this.board;
     }
@@ -85,13 +86,13 @@ public class State {
     }    
 
 
-    // current round number
     public int getRoundNumber() {
+        // current round number
         return this.board.getMrXTravelLog().size();
     }
 
-    // total number of rounds
     public int getTotalRounds() {
+        // total number of rounds
         return this.board.getSetup().moves.size();
     }
 
@@ -148,6 +149,25 @@ public class State {
         .map(location -> location.get())
         .collect(Collectors.toList());
     }
+    
+    /**
+     * @return List of remaining detective pieces
+     */
+    public List<Piece> getRemainingDetectivePieces() {
+        return this.getDetectivePieces().stream()
+            .filter(detective -> this.getAvailableMoves().stream().anyMatch(m -> m.commencedBy().equals(detective)))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * @param detective
+     * @return List of moves for detective piece
+     */
+    public List<Move> getDetectiveMoves(Piece detective) {
+        return this.getAvailableMoves().stream()
+            .filter(m -> m.commencedBy().equals(detective))
+            .collect(Collectors.toList());
+    }
 
 
     /* Static methods */
@@ -165,6 +185,27 @@ public class State {
         for (Move move : detectiveMoves) {
             State newState = state.advanceDetective(move);
             int score = new ScoreDetective(detective, move, newState).getScore();
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestMove = move;
+            }
+        }
+
+        return bestMove;
+    }
+
+    /**
+     * @param state
+     * @return Move best move for mrX
+     */
+    public static Move getMrXBestMove(State state) {
+        Move bestMove = null;
+        int bestScore = Integer.MIN_VALUE;
+
+        for (Move move : state.getAvailableMoves()) {
+            State newState = state.advanceMrX(move);
+            int score = new ScoreMrX(move, newState, newState.getRoundNumber()).getScore();
 
             if (score > bestScore) {
                 bestScore = score;

@@ -5,13 +5,12 @@ import java.util.Set;
 
 
 import uk.ac.bris.cs.scotlandyard.model.Move;
-import uk.ac.bris.cs.scotlandyard.model.Board.GameState;
 import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Ticket;
 import uk.ac.bris.cs.scotlandyard.ui.ai.State;
 
 
 
-public class Score {
+public class ScoreMrX implements ScoreHeuristic {
     private int score;
     private int mrXlocation;
     private State state;
@@ -19,7 +18,7 @@ public class Score {
     private Move move;
 
     // Constructor
-    public Score(Move move, State state, Boolean maximizingPlayer, int round) {
+    public ScoreMrX(Move move, State state, int round) {
         this.move = move;
         this.state = state;
         this.round = round;
@@ -27,12 +26,17 @@ public class Score {
         this.score = 0;
         this.mrXlocation = this.state.getMrXLocation();
 
+        // scores state
         this.scoreState();
     }
 
     // Getters
     public int getScore() {
         return this.score;
+    }
+
+    public Move getMove() {
+        return this.move;
     }
 
     public int getRound() {
@@ -44,17 +48,13 @@ public class Score {
     }
 
     public void scoreState() {
-        // add score for nbr of nodes mrX can move to
-        // scores locations where mrX has more options to move to
-
-        // this.score += (nbrOfNodes * C); // 12
-
         // get detective locations
         List<Integer> detectiveLocations = this.state.getDetectiveLocations();
 
         // gets adjancent nodes to mrX location
         Set<Integer> adjacentNodes = this.state.getSetup().graph.adjacentNodes(mrXlocation);
 
+        // add score for available locations from mrX location
         this.score += this.availableLocationsScore(adjacentNodes);
 
 
@@ -69,16 +69,13 @@ public class Score {
             // get minimum distance from mrX to detective
             minDetectiveDistance = Math.min(minDetectiveDistance, shortestPath);
 
-            // this.score += shortestPath;
-
             // check if mrX is in a position where he can be caught
             if (adjacentNodes.contains(detectiveLocation)) {
                 this.score -= 1000;
             }
         }
 
-        // add min detective distance to score
-        // this.score += Math.pow(minDetectiveDistance, 2);
+        // add min detective distance to score * 10
         this.score += minDetectiveDistance * 10;
 
         // tickets score
@@ -94,45 +91,56 @@ public class Score {
     }
 
     private Integer availableLocationsScore(Set<Integer> adjacentNodes) {
-        int C = 10;
+        int C = 12;
 
         // number of ajacent nodes
         int nbrOfNodes = adjacentNodes.size(); // part of score
 
+        // return nbr of adjace cent nodes * C
         return nbrOfNodes * C;
-
     }
 
 
 
-    //! move filtering (try to se if it can be used separately)
+    /**
+     * @param move
+     * @return score for the move based on the ticket used and the type of move
+     */
     private Integer moveTicketScore(Move move) {
-        //! take scarcity into consideration
         return move.accept(new MoveTicketVisitor());
     }
 
 
-    // MoveTicketVisitor class implements Move.Visitor 
+    /**
+     * MoveTicketVisitor class implements the Visitor interface
+     * to score the move based on the ticket used and the type of move
+     */
     private class MoveTicketVisitor implements Move.Visitor<Integer> {
         @Override
         public Integer visit(Move.SingleMove move) {
             // multiplier constant for increase scoring for single moves
             // increases the likely hood of mrX choosing a single move
-            int multiplier = 25;
+            int multiplier = 30;
+
             if (move.ticket == Ticket.TAXI)
-                return 4*multiplier;
+                return multiplier;
+                // return TicketWeight.TAXI.getValue() * multiplier;
             else if (move.ticket == Ticket.BUS)
-                return 4*multiplier;
+                return multiplier;
+                // return TicketWeight.BUS.getValue() * multiplier;
             else if (move.ticket == Ticket.UNDERGROUND)
-                return 4*multiplier;
+                return multiplier;
+                // return TicketWeight.UNDERGROUND.getValue() * multiplier;
             else if (move.ticket == Ticket.SECRET) {
                 
                 // check if previous round was revealed
-                if (round > 1 && state.getSetup().moves.get(round-1-1)) {
+                if (round > 1 && state.getSetup().moves.get(round-2)) {
                     // increase score for secret ticket if previous round was revealed
-                    return 8*multiplier;
+                    // heavily weighted
+                    return TicketWeight.SECRET_HEAVY.getValue() * multiplier;
                 } else {
-                    return 1*multiplier;
+                    // lightly weighted
+                    return TicketWeight.SECRET_LIGHT.getValue() * multiplier;
                 }
             }
             else
@@ -141,25 +149,25 @@ public class Score {
 
         @Override
         public Integer visit(Move.DoubleMove move) {
-            // return 5;
             int score = 0;
             for (Ticket ticket : move.tickets()) {
                 if (ticket == Ticket.TAXI)
-                    score += 4;
+                    score += TicketWeight.TAXI.getValue();
                 else if (ticket == Ticket.BUS)
-                    score += 3;
+                    score += TicketWeight.BUS.getValue();
                 else if (ticket == Ticket.UNDERGROUND)
-                    score += 2;
+                    score += TicketWeight.UNDERGROUND.getValue();
                 else if (ticket == Ticket.SECRET) {
                     // check if previous round was revealed
                     // Boolean previousRoundRevealed = state.getSetup().moves.get(round-2);
-                    if (round > 1  && state.getSetup().moves.get(round-1-1)) {
+                    if (round > 1  && state.getSetup().moves.get(round-2)) {
                         // increase score for secret ticket if previous round was revealed
-                        score += 8;
+                        // heavily weighted
+                        score += TicketWeight.SECRET_HEAVY.getValue();
                     } else {
-                        score += 1;
+                        // lightly weighted
+                        score += TicketWeight.SECRET_LIGHT.getValue();
                     }
-
                 }
             }
             return score;

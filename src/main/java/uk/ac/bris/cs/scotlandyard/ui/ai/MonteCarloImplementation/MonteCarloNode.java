@@ -9,6 +9,7 @@ import org.glassfish.grizzly.http.server.StaticHttpHandler;
 
 import uk.ac.bris.cs.scotlandyard.model.Move;
 import uk.ac.bris.cs.scotlandyard.model.Piece;
+import uk.ac.bris.cs.scotlandyard.model.ScotlandYard.Ticket;
 import uk.ac.bris.cs.scotlandyard.ui.ai.State;
 
 public class MonteCarloNode {
@@ -136,7 +137,6 @@ public class MonteCarloNode {
         double maxScore = Double.MIN_VALUE;
 
         for (MonteCarloNode child : children) {
-            // double childScore = child.getAverageScore();
             double childScore = child.getPlays();
 
             if (childScore > maxScore) {
@@ -149,7 +149,7 @@ public class MonteCarloNode {
     }
 
     // get moves for rollout policy
-    public Move rolloutPolicy(State state) {
+    public Move randomRolloutPolicy(State state) {
         Random rand = new Random();
         List<Move> legalMoves = state.getAvailableMoves().stream().collect(Collectors.toList());
         int randomIndex = rand.nextInt(legalMoves.size());
@@ -160,11 +160,7 @@ public class MonteCarloNode {
     public Move biasedRolloutPolicy(State state) {
         List<Move> legalMoves = state.getAvailableMoves().stream().collect(Collectors.toList());
         if (state.isMrxTurn()) {
-            Random rand = new Random();
-            int randomIndex = rand.nextInt(legalMoves.size());
-            Move randomMove = legalMoves.get(randomIndex);
-            return randomMove;
-
+            return State.getMrXBestMove(state);
         } else {
             Piece detective = legalMoves.get(0).commencedBy();
             return State.getDetectiveBestMove(detective, legalMoves, state);
@@ -174,48 +170,26 @@ public class MonteCarloNode {
     
     // Perform a random simulation from this node
     public double simulate() {
-        // Random rand = new Random();
-
         State state = this.gameState;
 
         // rollout policy
         // play until end of game
         while (state.getBoard().getWinner().isEmpty()) {
             if (state.isMrxTurn()) {
-                // state = state.advanceMrX(rolloutPolicy(state));
-                state = state.advanceMrX(biasedRolloutPolicy(state));
+                state = state.advanceMrX(randomRolloutPolicy(state));
+                // state = state.advanceMrX(biasedRolloutPolicy(state));
             } else {
-                // state = state.advanceDetective(rolloutPolicy(state));
-                state = state.advanceDetective(biasedRolloutPolicy(state));
+                state = state.advanceDetective(randomRolloutPolicy(state));
+                // state = state.advanceDetective(biasedRolloutPolicy(state));
             }
-            // List<Move> legalMoves = state.getAvailableMoves().stream().collect(Collectors.toList());
-
-            // int randomIndex = rand.nextInt(legalMoves.size());
-
-            // Move randomMove = legalMoves.get(randomIndex);
-
-            // //! rewrite in state class to avoid redundancy
-            // if (state.isMrxTurn()) {
-            //     //! play mrx's best move (write in rollout policy)
-            //     state = state.advanceMrX(randomMove);
-            // } else {
-            //     //! play detective's best move (write in rollout policy)
-            //     state = state.advanceDetective(randomMove);
-            // }
         }
 
 
         if (state.getWinner() == State.winner.MrX) {
-            // return 1;
-            return state.getTotalRounds();
+            return 1;
         } else {
-            // return -1;
-            return state.getRoundNumber();
+            return -1;
         }
-        // if(rollingMiniBoard.getWinner() == MiniBoard.winner.MRX) return getRoundSize()+1;
-        // else return rollingMiniBoard.getRound();
-
-        // return 0;
     }
 
     // Getters and setters
@@ -237,10 +211,6 @@ public class MonteCarloNode {
         }
         return this.score / this.n_plays;
     }
-
-    // public ImmutableSet<Move> getAvailableMoves() {
-    //     return availableMoves;
-    // }
 
     public MonteCarloNode getParent() {
         return parent;
